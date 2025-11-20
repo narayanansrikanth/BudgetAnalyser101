@@ -4,6 +4,13 @@
 #include <string>
 #include <iomanip>
 #include <limits> 
+#include <sstream>
+
+std::string formatAmount(double v) {
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(2) << v;
+    return oss.str();
+}
 
 struct Entry {
     std::string type; 
@@ -131,18 +138,120 @@ void viewSummary() {
     std::cout << "Expense : " << std::string(expenseBar, '|') << "\n\n";
 }
 
+void generateHTML() {
+    double totalIncome = 0, totalExpense = 0;
+    for (auto &e : entries) {
+        if (e.type == "Income") totalIncome += e.amount;
+        else totalExpense += e.amount;
+    }
+    double balance = totalIncome - totalExpense;
+
+    std::ofstream file("report.html");
+    if (!file) {
+        std::cout << "Error creating HTML file.\n";
+        return;
+    }
+
+    // HTML template with Google Charts pie chart
+    file << R"(
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Monthly Finance Report</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Type', 'Amount'],
+          ['Income', )" << totalIncome << R"(],
+          ['Expense', )" << totalExpense << R"(]
+        ]);
+
+        var options = {
+          title: 'Income vs Expense',
+          pieHole: 0.4
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+      }
+    </script>
+    <style>
+      body { font-family: Arial; margin: 30px; background: #f3f3f3; }
+      .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.08);}
+      h1 { text-align: center; }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+      th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+      th { background: #e8e8e8; }
+      .summary { font-size: 20px; font-weight: bold; }
+      .income { color: #2e8b57; }
+      .expense { color: #b22222; }
+      .balance { color: #1e90ff; }
+    </style>
+  </head>
+  <body>
+    <h1>Monthly Finance Report</h1>
+
+    <div class="card">
+      <p class="summary income">Total Income: $)" << formatAmount(totalIncome) << R"(</p>
+      <p class="summary expense">Total Expense: $)" << formatAmount(totalExpense) << R"(</p>
+      <p class="summary balance">Balance: $)" << formatAmount(balance) << R"(</p>
+    </div>
+
+    <div class="card" id="piechart" style="width: 100%; height: 400px;"></div>
+
+    <div class="card">
+      <h2>All Entries</h2>
+      <table>
+        <tr>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Date</th>
+        </tr>
+)";
+
+    for (auto &e : entries) {
+        file << "<tr>"
+             << "<td>" << e.type << "</td>"
+             << "<td>" << e.category << "</td>"
+             << "<td>$" << formatAmount(e.amount) << "</td>"
+             << "<td>" << e.date << "</td>"
+             << "</tr>\n";
+    }
+
+    file << R"(
+      </table>
+    </div>
+  </body>
+</html>
+)";
+
+    file.close();
+    std::cout << "HTML report created: report.html\n\n";
+
+    // Open the HTML in default browser (Windows)
+    system("start report.html");
+
+}
+
+
 int main() {
     loadData();
     int choice;
     do {
         std::cout << "=== Personal Finance Manager ===\n";
-        std::cout << "1. Add Income\n2. Add Expense\n3. View Summary\n4. Exit\n";
-        choice = getValidChoice(4, "Enter choice: ");
+        std::cout << "1. Add Income\n2. Add Expense\n3. View Summary\n4. Export HTML Report\n5. Exit\n";
+        choice = getValidChoice(5, "Enter choice: ");
         switch(choice) {
             case 1: addEntry("Income"); break;
             case 2: addEntry("Expense"); break;
             case 3: viewSummary(); break;
-            case 4: saveData(); std::cout << "Exiting...\n"; break;
+            case 4: generateHTML(); break;  // new option
+            case 5: saveData(); std::cout << "Exiting...\n"; break;
         }
     } while(choice != 4);
     return 0;

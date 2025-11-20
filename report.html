@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Monthly Finance Report</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Type', 'Amount'],
+          ['Income', 5000],
+          ['Expense', 1350]
+        ]);
+
+        var options = {
+          title: 'Income vs Expense',
+          pieHole: 0.4
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        chart.draw(data, options);
+      }
+    </script>
+    <style>
+      body { font-family: Arial; margin: 30px; background: #f3f3f3; }
+      .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.08);}
+      h1 { text-align: center; }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+      th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+      th { background: #e8e8e8; }
+      .summary { font-size: 20px; font-weight: bold; }
+      .income { color: #2e8b57; }
+      .expense { color: #b22222; }
+      .balance { color: #1e90ff; }
+    </style>
+  </head>
+  <body>
+    <h1>Monthly Finance Report</h1>
+
+    <div class="card">
+      <p class="summary income">Total Income: $5000.00</p>
+      <p class="summary expense">Total Expense: $1350.00</p>
+      <p class="summary balance">Balance: $3650.00</p>
+    </div>
+
+    <div class="card" id="piechart" style="width: 100%; height: 400px;"></div>
+
+    <div class="card">
+      <h2>All Entries</h2>
+      <table>
+        <tr>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Date</th>
+        </tr>
+<tr><td>Income</td><td>Salary</td><td>$5000.00</td><td>2025-11-01</td></tr>
+<tr><td>Expense</td><td>Rent</td><td>$1100.00</td><td>2025-11-01</td></tr>
+<tr><td>Expense</td><td>Food</td><td>$150.00</td><td>2025-11-02</td></tr>
+<tr><td>Expense</td><td>Entertainment</td><td>$100.00</td><td>2025-11-03</td></tr>
+
+      </table>
+    </div>
+  </body>
+</html>
